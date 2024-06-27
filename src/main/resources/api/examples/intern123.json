@@ -1,0 +1,27 @@
+[
+  {
+    "firstName": "John",
+    "lastName": "Smith",
+    "DOB": "1988-07-22",
+    "email": "john.smith@example.com",
+    "employmentType": "INTERN",
+    "DOJ": "2021-01-15"
+  },
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "DOB": "1990-01-01",
+    "empID": "E12345",
+    "email": "john.doe@example.com",
+    "employmentType": "PERMANENT",
+    "yearsOfExperience": 5,
+    "package": 75000,
+    "previousCompany": "ABC Corp",
+    "careerStartDate": "2015-06-01",
+    "businessDomain": "IT",
+    "BGVStatus": "Clear",
+    "projectPool": "Development",
+    "HREmail": "hr@example.com",
+    "DOJ": "2020-01-01"
+  }
+]

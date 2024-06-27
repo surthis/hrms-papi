@@ -1,0 +1,20 @@
+%dw 2.0
+
+type auto_ff324fd0_cdd3_4220_be3c_bc52e60058a1_Input_Payload = {
+  lastName: String, 
+  BGVStatus: String, 
+  package: String, 
+  employmentType: String, 
+  projectPool: String, 
+  previousCompany: String, 
+  firstName: String, 
+  careerStartDate: String, 
+  yearsOfExperience: String, 
+  DOB: String, 
+  businessDomain: String, 
+  email: String, 
+  DOJ: String, 
+  HREmail: String, 
+  _?: Any
+}
+

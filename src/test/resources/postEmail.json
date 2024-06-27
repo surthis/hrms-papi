@@ -1,0 +1,17 @@
+[{
+                        
+                        "firstName": "John", 
+                        "lastName": "Doe", 
+                        "BGVStatus": "Complete", 
+                        "package": "Standard", 
+                        "employmentType": "Full-time", 
+                        "projectPool": "ProjectX", 
+                        "previousCompany": "ABC Corp", 
+                        "careerStartDate": "2022-01-01", 
+                        "yearsOfExperience": 5, 
+                        "DOB": "1990-01-01", 
+                        "businessDomain": "IT", 
+                        "DOJ": "2023-01-01", 
+                        "email": "john.doe@example.com", 
+                        "HREmail": "hr@example.com"
+                    }]

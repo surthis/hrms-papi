@@ -1,0 +1,13 @@
+#%RAML 1.0 Library
+traits:
+  client_id_secret_auth:
+    description: This for client ID and secret authentication
+    headers:
+      client_id:
+        description: The client ID for authentication.
+        type: string
+        required: true
+      client_secret:
+        description: The client secret for authentication.
+        type: string
+        required: true

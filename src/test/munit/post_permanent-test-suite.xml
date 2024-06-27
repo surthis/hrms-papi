@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="post_permanent-test-suite.xml" />
+	<munit:test name="post_permanent-test-suite-post_permanentFlowTest1" doc:id="92bde2aa-8e39-4fe5-b3df-ecab4cc0d6ff" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="09e08816-e9a6-4718-a7b0-b68cb22369ae" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7903ae3b-f117-42a9-84a6-874b5b1f4b82" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[payload]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<!-- [STUDIO:"Spy"]<munit-tools:spy doc:name="Spy" doc:id="9e8df07f-6c51-40e1-af5d-c685e478a32f" processor="validation:is-email">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="email validation" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="1e56fec2-ef95-4a01-9b5f-6cd78fc29e48" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Validation_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="b91f5a6e-8d4d-42a4-8298-d12e0f6058b3" is="#[MunitTools::notNullValue()&#93;" expression="#[payload&#93;"/>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="036f705e-ef11-4ab1-993d-5c441b622c43" is="#[MunitTools::notNullValue()&#93;" expression="#[payload&#93;"/>
+				</munit-tools:after-call>
+			</munit-tools:spy> [STUDIO] -->
+			<!-- [STUDIO:"Mock when"]<munit-tools:mock-when doc:name="Mock when" doc:id="050ea3ca-7dcc-4324-9073-d1d74e1ea8a7" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="InsertEachRecords" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="7903ae3b-f117-42a9-84a6-874b5b1f4b82" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://postEmail.json")&#93;' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when> [STUDIO] -->
+			<!-- [STUDIO:"Spy"]<munit-tools:spy doc:name="Spy" doc:id="af0a8da5-2873-4f04-8cee-4ff763952c55" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="InsertEachRecords" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="7903ae3b-f117-42a9-84a6-874b5b1f4b82" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="2707c6c7-040f-4de0-a5b6-dc1938b5957f" is="#[MunitTools::notNullValue()&#93;" expression="#[payload&#93;"/>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="72a643ac-5fb8-41fc-8e25-2e953d59f3a7" is="#[MunitTools::notNullValue()&#93;" expression="#[payload&#93;"/>
+				</munit-tools:after-call>
+			</munit-tools:spy> [STUDIO] -->
+			<!-- [STUDIO:"Mock when"]<munit-tools:mock-when doc:name="Mock when" doc:id="3f0aacd9-3d39-449c-ae23-4aabbebe6b9f" processor="email:send">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="SendingMailToEachNewEmplyees" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="563fe623-561f-4ec9-9f68-3fb6037dd878" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Email_SMTP" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="lakshmisurthis@gmail.com" attributeName="fromAddress" />
+					<munit-tools:with-attribute whereValue="Welcome To Team" attributeName="subject" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://postEmail.json")&#93;' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when> [STUDIO] -->
+			<!-- [STUDIO:"Spy"]<munit-tools:spy doc:name="Spy" doc:id="e9fa324d-f155-416f-bec4-fdd8566ae52e" processor="email:send">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="SendingMailToEachNewEmplyees" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="563fe623-561f-4ec9-9f68-3fb6037dd878" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Email_SMTP" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="lakshmisurthis@gmail.com" attributeName="fromAddress" />
+					<munit-tools:with-attribute whereValue="Welcome To Team" attributeName="subject" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="0f821510-8da2-45c1-b816-8e6269db1857" is="#[MunitTools::notNullValue()&#93;" expression="#[payload&#93;"/>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="e826d52b-484f-4551-9697-4d8f9f697a35" is="#[MunitTools::notNullValue()&#93;" expression="#[payload&#93;"/>
+				</munit-tools:after-call>
+			</munit-tools:spy> [STUDIO] -->
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="30c367ef-3045-4290-a93b-dc225063c4bf" >
+				<munit:payload value="#[MunitTools::getResourceAsString('postEmail.json')]" encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post_permanentFlow" doc:id="50c8c2fe-8f8a-4ae5-a2a6-ddda261dcafb" name="post_permanentFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="921f19ff-4e6a-4e58-8bec-036e9d0fb691" actual="#[payload]" expected="#[{&#10;                    'empName': 'John',&#10;                    'data': 'inserted',&#10;                    'emailStatus': 'success'&#10;                }]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

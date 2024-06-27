@@ -1,0 +1,59 @@
+#%RAML 1.0
+title: HRMS PAPI
+version: v1
+protocols: [HTTPS]
+mediaType: application/json
+
+types:
+  Intern: !include datatype/dataType2.raml
+  Permanent: !include datatype/datatype.raml
+
+uses:
+  security1: security/library.raml
+
+traits:
+  success_response_trait: !include traits/straits.raml
+  error_response_trait: !include traits/traits.raml
+
+/employees:
+ 
+  /intern1:
+    is: [error_response_trait, success_response_trait]
+    post:
+      description: Store intern employee data to the database
+      body:
+        application/json:
+          type: Intern
+      responses:
+        201:
+          body:
+            application/json:
+              example: !include examples/intern_employee_data.raml
+  /permanent:
+    is: [error_response_trait, success_response_trait]
+    post:
+      description: Store permanent employee data to the database
+      body:
+        application/json:
+          type: Permanent
+      responses:
+        201:
+          body:
+            application/json:
+              example: !include examples/permanent_employee_data.raml
+  
+  /{empID}:
+    is: [error_response_trait, success_response_trait]
+    uriParameters:
+      empID:
+        type: string
+        description: The employee ID
+    get:
+      description: Retrieve employee data from the database
+      responses:
+        200:
+          body:
+            application/json:
+              example: 
+                intern: !include examples/intern_employee_data.raml
+                permanent: !include examples/permanent_employee_data.raml

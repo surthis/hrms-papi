@@ -1,0 +1,4 @@
+{
+  "minMuleVersion": "4.6.0",
+  "secureProperties": ["client_id: 75eb79e2b60b452b9efe04cad34fcb93","client_secret: 28ed65CAeAa44015A8319cb25a3294B2","mule.key: password12345678"]
+}

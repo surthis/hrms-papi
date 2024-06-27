@@ -1,0 +1,107 @@
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="post_permanentFlow" doc:id="dc836485-c0d3-4433-aa47-32ddeebc7415">
+		<ee:transform doc:name="inputPayload" doc:id="71756ee1-3144-44c9-88eb-a9cea4ec33a5">
+			<ee:message>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="oriPayload" ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+fun generateRandomNumber() = 
+  "PER" ++ "-" ++ upper((uuid() as String) splitBy "-" joinBy "")[4 to 9]
+---
+payload map ((employee) -> {
+    empID: generateRandomNumber(),
+    lastName: employee.lastName,
+    BGVStatus: employee.BGVStatus,
+    package: employee.package,
+    employmentType: employee.employmentType,
+    projectPool: employee.projectPool,
+    previousCompany: employee.previousCompany,
+    firstName: employee.firstName,
+    careerStartDate: employee.careerStartDate,
+    yearsOfExperience: employee.yearsOfExperience,
+    DOB: employee.DOB,
+    businessDomain: employee.businessDomain,
+    DOJ: employee.DOJ,
+    email: employee.email,
+    HREmail: employee.HREmail
+})]]></ee:set-variable>
+				<ee:set-variable variableName="emailResults" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+			</ee:variables>
+		
+</ee:transform>
+		<foreach doc:name="ForEachEmployeeRecords" doc:id="13392eda-b2b3-46ed-b919-12365995ae60" collection="#[vars.oriPayload]">
+			<try doc:name="Try" doc:id="4e4c35cb-9142-4127-a73f-b8efa170b491" transactionType="XA">
+				<validation:is-email doc:name="email validation" doc:id="1e56fec2-ef95-4a01-9b5f-6cd78fc29e48" config-ref="Validation_Config" email="#[payload.email]" message='#[" invalid email"]' />
+				<ee:transform doc:name="currentPayload" doc:id="429b0a9b-34b3-4071-a377-5c696c354d46">
+					<ee:variables>
+						<ee:set-variable variableName="currentEmployee"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<db:insert doc:name="InsertEachRecords" doc:id="7903ae3b-f117-42a9-84a6-874b5b1f4b82" config-ref="Database_Config">
+					<db:sql ><![CDATA[INSERT INTO PEMPLOYEES (EMPID, FIRSTNAME, LASTNAME, DOB, EMAIL, EMPLOYMENTTYPE, YEARSOFEXPERIENCE, PACKAGE, PREVIOUSCOMPANY, CAREERSTARTDATE, BUSINESSDOMAIN, BGVSTATUS, PROJECTPOOL, HREMAIL, DOJ) 
+VALUES (:empID, :firstName, :lastName, :DOB, :email, :employmentType, :yearsOfExperience, :package, :previousCompany, :careerStartDate, :businessDomain, :BGVStatus, :projectPool, :HREmail, :DOJ);]]></db:sql>
+					<db:input-parameters ><![CDATA[#[vars.currentEmployee]]]></db:input-parameters>
+				</db:insert>
+				<email:send doc:name="SendingMailToEachNewEmplyees" doc:id="563fe623-561f-4ec9-9f68-3fb6037dd878" config-ref="Email_SMTP" fromAddress="lakshmisurthis@gmail.com" subject="Welcome To Team">
+					<email:to-addresses>
+						<email:to-address value="#[vars.currentEmployee.email]" />
+					</email:to-addresses>
+					<email:body contentType="text/plain">
+						<email:content><![CDATA[#[output application/java
+---
+"Dear " ++ vars.currentEmployee.firstName ++ ",
+
+I am delighted to inform you that you have been selected, and you have been officially considered for a Permanent employee. Congratulations!
+
+Employee ID: " ++ vars.currentEmployee.empID]]]></email:content>
+					</email:body>
+				</email:send>
+				<ee:transform doc:name="storingTheStatus" doc:id="9e3cb703-988c-40d0-9a09-28881bc3c65f">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="emailResults"><![CDATA[%dw 2.0
+output application/json
+---
+flatten(vars.emailResults ++ [{
+    empName: vars.currentEmployee.firstName,
+    data: 'inserted',
+    emailStatus: 'success'
+}])]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<error-handler>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="bdf26171-82ab-41e0-b763-a3d93e524184" type="ANY">
+						<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;flatten(vars.emailResults ++ [{&#10;    empName: payload.firstName,&#10;    data: 'not inserted',&#10;    emailStatus: 'unsuccess'&#10;}])]" doc:name="Append f" doc:id="3e472309-5327-4348-bf26-ab0e865e536b" variableName="emailResults" />
+					
+</on-error-continue>
+				</error-handler>
+			</try>
+		</foreach>
+		<ee:transform doc:name="emailResults" doc:id="f965970b-ca8f-40a6-9485-15c248a4f904">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    
+    emailResults: vars.emailResults
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+
+</mule>

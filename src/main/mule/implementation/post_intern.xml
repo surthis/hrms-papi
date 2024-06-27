@@ -1,0 +1,125 @@
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+      xmlns:email="http://www.mulesoft.org/schema/mule/email"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+
+    <validation:config name="Validation_Config" doc:name="Validation Config" doc:id="a5a2f238-bd67-4334-9964-bfd7d430288f" />
+    
+    <flow name="post_internFlow" doc:id="21c27736-3712-4094-992c-bfd02181db52">
+        
+        <!-- Initial transformation to ensure the payload is an array -->
+        
+        <!-- Transform each entry to include a generated employee ID -->
+        <ee:transform doc:name="inputPayload" doc:id="61ada2ff-77bb-46e9-aa2c-17eb191cc305">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="emailResults"><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+                <ee:set-variable variableName="oripayload"><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+fun generateRandomNumber() = 
+  "INT" ++ "-" ++ upper((uuid() as String) splitBy "-" joinBy "")[4 to 9]
+---
+payload map ((employee) -> {
+    empID: generateRandomNumber(),
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    DOB: employee.DOB,
+    email: employee.email,
+    employmentType: employee.employmentType,
+    DOJ: employee.DOJ
+})]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+
+        <!-- Iterate over the array and process each record -->
+        <foreach doc:name="ForEachEmployeeRecords" doc:id="c6ba90b2-a124-4cbe-938c-0981e858df91" collection="#[vars.oripayload]">
+            <try doc:name="Try" doc:id="121371b4-dc45-4661-a101-fc082928412e" transactionType="XA">
+                
+                <!-- Validate Email -->
+                <validation:is-email doc:name="validatingMail" doc:id="bff8f187-af2d-46ef-b239-96de397b42c4" config-ref="Validation_Config" email="#[payload.email]" message='#[" invalid email"]'/>
+                
+                <!-- Store the current payload in a variable before inserting into the database -->
+                <ee:transform doc:name="current Employee" doc:id="9e093592-ba22-4673-aa19-0db9b59eddb6">
+                    <ee:variables>
+                        <ee:set-variable variableName="currentEmployee"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+                
+                <db:insert doc:name="InsertingEachRecording" doc:id="5a0a0bf7-2229-4430-8fb9-b215e15a118e" config-ref="Database_Config">
+                    <db:sql><![CDATA[INSERT INTO EMPLOYEESI (EMPID, FIRSTNAME, LASTNAME, DOB, EMAIL, EMPLOYMENTTYPE, DOJ)
+VALUES (:empID, :firstName, :lastName, :DOB, :email, :employmentType, :DOJ);]]></db:sql>
+                    <db:input-parameters><![CDATA[#[vars.currentEmployee]]]></db:input-parameters>
+                </db:insert>
+                
+                <!-- Send Email -->
+                <email:send doc:name="SendingMailToEachEmplyee" doc:id="d4f9d782-c4ab-4fb8-9f09-ac1cfa7eced3" config-ref="Email_SMTP" fromAddress="lakshmisurthis@gmail.com" subject="Welcome to the team">
+                    <email:to-addresses>
+                        <email:to-address value="#[vars.currentEmployee.email]" />
+                    </email:to-addresses>
+                    <email:body contentType="text/plain">
+                        <email:content><![CDATA[#[output application/java
+---
+"Dear " ++ vars.currentEmployee.firstName ++ ",
+
+I am delighted to inform you that you have been selected for Intern, and your intern duration is 6 months. Based on the performance, you will be officially considered for an intern employee. Congratulations!
+
+Employee ID: " ++ vars.currentEmployee.empID]]]></email:content>
+                    </email:body>
+                </email:send>
+                
+                <ee:transform doc:name="emailResults" doc:id="ad4c2c58-af48-4140-86e1-da4f123e841b">
+                    <ee:variables>
+                        <ee:set-variable variableName="emailResults"><![CDATA[%dw 2.0
+output application/json
+---
+flatten(vars.emailResults ++ [{
+    empName: vars.currentEmployee.firstName,
+    data: 'inserted',
+    emailStatus: 'success'
+}])]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+                
+                <error-handler>
+                    <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="fa9df0a3-5a44-436b-81eb-505637678f70" type="ANY">
+                        <!-- Append failed email result -->
+                        <set-variable variableName="emailResults" value="#[%dw 2.0&#10;output application/json&#10;---&#10;flatten(vars.emailResults ++ [{&#10;    empName: payload.firstName,&#10;    data: 'not inserted',&#10;    emailStatus: 'unsuccess'&#10;}])]" doc:name="Append f" doc:id="bdae754a-38ad-49be-a92d-48d5fb6f23a7"/>
+                    </on-error-continue>
+                </error-handler>
+                
+            </try>
+        </foreach>
+
+        <!-- Log the email results -->
+        <logger level="INFO" doc:name="Logger" doc:id="23697cd2-c558-4218-992d-aa5423d09678"/>
+
+        <!-- Set the final response payload -->
+        <ee:transform doc:name="Set Response Payload" doc:id="8b50687c-3ff8-43b1-b87e-a9b500cb2490">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    emailResults: vars.emailResults
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    
+    </flow>
+</mule>

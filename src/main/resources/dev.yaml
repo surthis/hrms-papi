@@ -1,0 +1,13 @@
+http:
+  port: "8081"
+  host: "0.0.0.0."
+  
+db:
+  host: "sql10.freesqldatabase.com"
+  port: "3306"
+  user: "sql7716462"
+  password: "ueDapJ58Yq"
+  database: "sql7716462"
+ 
+Ppath:
+  path: "/api/*"

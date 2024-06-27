@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get_empFlow" doc:id="87398e5b-5050-4005-8067-e39dcc4b124e" >
+		<logger level="INFO" doc:name="Logger" doc:id="a80d15f2-4240-48b0-9d24-4571b6d6e6b3" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="fb1e2c76-3546-4674-aedf-34a93ba53744" >
+			<when expression='#[vars.empID startsWith "INT"]' >
+				<logger level="INFO" doc:name="Logger" doc:id="71c13627-246e-417c-896f-0fc1bc0b8d26" message="#[payload]" />
+				<db:select doc:name="Select" doc:id="05895bc9-bf99-4a05-91e8-6335c6af53e9" config-ref="Database_Config" >
+					<db:sql ><![CDATA[SELECT * FROM EMPLOYEESI WHERE EMPID = :empid AND EMPID LIKE 'INT%';]]></db:sql>
+					<db:input-parameters ><![CDATA[#[empid : vars.empID]]]></db:input-parameters>
+				</db:select>
+			</when>
+			<otherwise >
+				<db:select doc:name="Select" doc:id="0cc6eb23-2c24-4850-9b82-580e35454c75" config-ref="Database_Config" >
+					<db:sql ><![CDATA[SELECT * FROM PEMPLOYEES WHERE EMPID = :empid AND EMPID LIKE 'PER%';]]></db:sql>
+					<db:input-parameters ><![CDATA[#[empid : vars.empID]]]></db:input-parameters>
+				</db:select>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="07652e5d-e3a3-45ae-b4a6-f76ca0e8b2ca" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
